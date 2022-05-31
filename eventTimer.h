@@ -18,9 +18,6 @@ private:
     bool event_active;
     bool always_active;
 public:
-    explicit operator unsigned long() const {
-        return event_time;
-    }
 
     explicit eventTimer(unsigned long time) {
         event_time = time;
@@ -30,7 +27,7 @@ public:
 
     eventTimer() {
         event_time = 0;
-        event_active = false;
+        event_active = true; // Event has already happened and also never happened
         always_active = false;
     }
 
@@ -138,12 +135,30 @@ public:
     }
 
     /**
+     * @brief Returns the remaining time in milliseconds.
+     * @note This function returns zero if the event time has passed.
+     * @return The remaining time in milliseconds. (zero if the event time has passed)
+     */
+    explicit operator unsigned long() const {
+        return (event_time - millis()) > 0 ? (event_time - millis()) : 0;
+    }
+
+    /**
+     * @brief Returns the remaining time in milliseconds.
+     * @note This function returns a negative value if the event time has passed.
+     * @return The remaining time in milliseconds.
+     */
+    explicit operator long() const{
+        return (long) event_time - millis();
+    }
+
+    /**
      * @brief Checks if the event time has passed.
      * @note If this is a one time event, it will be set to false after it has passed and been checked.
      * changing the event time will reset the event to active.
      * @return True if the event time has passed, false otherwise.
      */
-    bool operator ~ () {
+    explicit operator bool() {
         if (always_active) {
             return (event_time - millis()) <= 0;
         } else {
